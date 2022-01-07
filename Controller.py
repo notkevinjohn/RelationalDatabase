@@ -3,18 +3,18 @@ from OutputManager import OutputManager
 from termcolor import colored
 
 class Controller():
+
 	def __init__(self, dbfile):
 		self.dbfile = dbfile
 		self.outputManager = OutputManager()
-		self.output("Init "+str(dbfile), "status")
-
+		self.output("init "+str(dbfile), "status")
 
 	def connect(self):
-		self.output("Connect")
 		try:
 			self.connection = sqlite3.connect("database.db")
-		except Error as e:
-			self.output ("error"+str(e))
+			self.output("connected","success")
+		except Exception as e:
+			self.output ("error"+str(e), "fail")
 
 	def createTable(self, name, values):
 		command = "CREATE TABLE IF NOT EXISTS "+name+"("
@@ -26,9 +26,10 @@ class Controller():
 		self.execute(command)
 
 	def listTables(self):
-		cursor = self.connection.cursor()
-		cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-		print (cursor.fetchall())
+		command = "SELECT name FROM sqlite_master WHERE type='table'"
+		results = self.execute(command)
+		for row in results:
+			self.output(row[0],"status")
 
 	def addRecord(self, name, values):
 		columnsSQL = []
@@ -43,25 +44,46 @@ class Controller():
 		cursor = self.connection.cursor()
 		command = "SELECT * FROM Characters"
 		cursor.execute(command)
-		print (cursor.fetchall())
+		return cursor.fetchall()
+
+	def getHeaders(self, table):
+		cursor = self.connection.cursor()
+		command = "PRAGMA table_info(Characters)"
+		cursor.execute(command)
+		results = []
+		for item in cursor.fetchall():
+			results.append(item[1])
+		return results
 
 	def execute(self, command):
 		cursor = self.connection.cursor()
-		self.output(command)
-		cursor.execute(command)
+		self.output(command, "sql")
+		return cursor.execute(command)
 
 	def commit(self):
+		self.output("Commit","status")
 		self.connection.commit()
 
 	def output(self, message, type):
 		self.outputManager.output(message, type)
 
+	def StringList(self, collection):
+		list = []
+		for value in collection:
+			array = []
+			for item in value:
+				array.append(str(item))
+			list.append(array)
+		return list
+
 
 if __name__ == "__main__":
 	controller = Controller("database.db")
-	#controller.connect()
+	controller.connect()
+	headers = controller.StringList(controller.getHeaders("Characters"))
+	print (headers)
 	#controller.createTable("Characters", {"id":"INTEGER PRIMARY KEY","name":"TEXT","species":"TEXT","description":"TEXT"})
 	#controller.listTables()
 	#controller.addRecord("Characters",{"name":"Ackbar","species":"Mon Calamari","description":"Cool Admiral"})
-	#controller.commit()
 	#controller.getRecords("Characters")
+	#controller.commit()
