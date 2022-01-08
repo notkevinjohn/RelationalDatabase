@@ -1,31 +1,37 @@
 from OutputManager import *
 import PySimpleGUI as sg
+from OutputManager import *
+
 
 class CharacterEditor():
 	def __init__ (self, data, headers, controller):
 		self.data = data
 		self.headers = headers
 		self.controller = controller
+		self.cancelEvent = "CANCEL"
+		self.saveEvent = "SAVE"
+		self.output = OutputManager()
+		self.output.output("init CharacterEditor", "status")
+
 
 	def build(self):
 		layout = []
 		for i in range(0, len(self.data)):
 			layout.append([sg.Text(self.headers[i]), sg.Input(self.data[i])])
-		layout.append([sg.Button('Cancel'), sg.Button('Save')])
-		sg.theme("Dark")
-		window = sg.Window(title="Character List View", layout=[layout])
+		layout.append([sg.Button('Cancel', key=self.cancelEvent), sg.Button('Save', key=self.saveEvent)])
+		window = sg.Window("Character List View", layout)
+		window.source = self
 		return window
 
+	def save(self, values):
+		update = {}
+		for index in values:
+			if not self.headers[index] == "id":
+				update[self.headers[index]] = values[index]
+			else:
+				id = values[index]
+		self.controller.updateRecord(id, update)
+		self.controller.commit()
 
 
-#if __name__ == "__main__":
-#	header = ["id","name","species","description"]
-#	data = ["1","Ackbar","Mon Cala","Cool Admiral"]
 
-#	ce = CharacterEditor(data, header)
-#	while True:
-#		event, values = ce.read()
-#		print (event, values)
-#		if event == sg.WIN_CLOSED or event == 'Exit':
-#			break
-#	ce.close()

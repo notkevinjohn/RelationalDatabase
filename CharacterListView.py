@@ -7,11 +7,13 @@ class CharacterListView():
 	def __init__(self, controller):
 		self.controller = controller
 		self.output = OutputManager()
-		self.data = self.controller.StringList(self.controller.getRecords("Characters"))
-		self.headers = self.controller.getHeaders("Characters")
+		self.data = []
+		self.headers = []
 		self.output.output("init CharacterListView", "status")
 
 	def build(self):
+		self.data = self.controller.StringList(self.controller.getRecords("Characters"))
+		self.headers = self.controller.getHeaders("Characters")
 		self.tableKey = "TABLE_KEY"
 		layout = [
 			[sg.Table(values=self.data,
@@ -25,24 +27,13 @@ class CharacterListView():
 	      		[sg.Submit(), sg.Cancel()]
 		]
 
-		sg.theme("Dark")
 		window = sg.Window(title="Character List View", layout=[layout])
 		window.source = self
+		self.window = window
 		return window
 
-#while True:
-#	event, values = window.read()
-#	if event==tableKey:
-#		record =  (data[values[tableKey][0]])
-#		characterEditor = CharacterEditor(record, headers)
-#		while True:
-#			event2, value2 = characterEditor.read()
-#			if event2 == sg.WIN_CLOSED or event2 == 'Exit':
-#				break
-
-#	print ("values", values)
-#	if event == sg.WIN_CLOSED or event == 'Exit':
-#		break
-
-#window.close()
+	def loadData(self):
+		self.data = self.controller.StringList(self.controller.getRecords("Characters"))
+		self.headers = self.controller.getHeaders("Characters")
+		self.window[self.tableKey].update(values = self.data, headings = self.headers)
 

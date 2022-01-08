@@ -40,6 +40,19 @@ class Controller():
 		command = "INSERT INTO "+name+"("+",".join(columnsSQL)+") VALUES ("+",".join(valuesSQL)+")"
 		self.execute(command)
 
+	def updateRecord(self, id, values):
+		command = "UPDATE Characters SET "
+		valueList = []
+		for value in values:
+			element=str(value)
+			element+="='"
+			element+=str(values[value])
+			element+="'"
+			valueList.append(element)
+		command+= (", ".join(valueList))
+		command+=" WHERE id="+str(id)
+		self.execute(command)
+
 	def getRecords(self, table):
 		cursor = self.connection.cursor()
 		command = "SELECT * FROM Characters"
@@ -80,10 +93,12 @@ class Controller():
 if __name__ == "__main__":
 	controller = Controller("database.db")
 	controller.connect()
-	headers = controller.StringList(controller.getHeaders("Characters"))
-	print (headers)
+	#headers = controller.StringList(controller.getHeaders("Characters"))
+	#print (headers)
 	#controller.createTable("Characters", {"id":"INTEGER PRIMARY KEY","name":"TEXT","species":"TEXT","description":"TEXT"})
 	#controller.listTables()
 	#controller.addRecord("Characters",{"name":"Ackbar","species":"Mon Calamari","description":"Cool Admiral"})
 	#controller.getRecords("Characters")
 	#controller.commit()
+	controller.updateRecord("1",{"name":"Gaial Ackbar","species":"Mon Calamari","description":"Cool Admiral"})
+	controller.commit()
